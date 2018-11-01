@@ -29,3 +29,5 @@ class Atsp(object):
                 leaf = node
         path = leaf.get_path()
         return min_cost, path
+
+    def branch_and_bound(self):
