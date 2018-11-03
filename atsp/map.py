@@ -19,12 +19,35 @@ class Matrix(object):
         return len(self.table)
 
     def zeros_to_infinities(self):
-        for i, row in enumerate(self.table):
-            for j, cell in enumerate(row):
-                if cell < 1:
-                    self.table[i][j] = inf
+        # for i, row in enumerate(self.table):
+        #     for j, cell in enumerate(row):
+        #         if i == j < 1:
+        #             self.table[i][j] = inf
+        for i in range(len(self.table)):
+            self.table[i][i] = inf
 
-    def find_division_point(self):
+    def check_point_for_cycle(self, point, chosen_edges):
+        new_chosen_edges = chosen_edges + [point]
+        paths = self.build_total_paths(new_chosen_edges)
+        for path in paths:
+            # print(path)
+            if len(path) < len(self.table) + 1 and path[0] == path[-1]:
+                print('Point {} forms a cycle in path'.format(point, path))
+                return True
+            else:
+                return False
+
+    def build_total_paths(self, chosen_edges):
+        return [self._build_total_path([i], list(chosen_edges)) for i in range(len(self.table))]
+
+    def _build_total_path(self, path, edges):
+        for i, edge in enumerate(edges):
+            if edge[0] == path[-1]:
+                path.append(edges.pop(i)[1])
+                return self._build_total_path(path, edges)
+        return path
+
+    def find_division_point(self, chosen_edges):
         max_reduction_cost = -1
         point = None
         inverted = self.get_inverted()
@@ -34,10 +57,11 @@ class Matrix(object):
                     # continue
                     reduction_cost = self._reduction_cost(row, j) + self._reduction_cost(column, i)
                     # print(reduction_cost)
-                    if reduction_cost > max_reduction_cost:
+                    possible_point = [i, j]
+                    if reduction_cost > max_reduction_cost and not self.check_point_for_cycle(possible_point, chosen_edges):
                         # print(reduction_cost)
                         max_reduction_cost = reduction_cost
-                        point = [i, j]
+                        point = possible_point
                         # print('POINT {}'.format(point))
         return point
         # point, value = self._find_division_point(self.table)
@@ -138,7 +162,7 @@ class Map(object):
         return list(range(self.size))
 
     def find_division_point(self):
-        return self._matrix.find_division_point()
+        return self._matrix.find_division_point(self.chosen_edges)
 
     def choose_edge(self, start, destination):
         for i in range(self.size):
