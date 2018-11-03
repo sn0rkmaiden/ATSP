@@ -31,3 +31,4 @@ class Atsp(object):
         return min_cost, path
 
     def branch_and_bound(self):
+        pass
