@@ -105,11 +105,13 @@ class SolutionExplorer(object):
         new_best_path = self.current_solution.map.build_total_path()
         new_best_cost = self.current_solution.map.total_path_cost
         if len(new_best_path) < self.map.size + 1:
-            logger.warning('Incomplete path {} for edges {}'.format(new_best_path, self.current_solution.map.chosen_edges))
+            # logger.warning('Incomplete path {} for edges {}'.format(new_best_path, self.current_solution.map.chosen_edges))
             return
         if not self.best_cost or self.best_cost != new_best_cost:
             self.best_path = [new_best_path]
             self.best_cost = new_best_cost
+            print(self.best_path, self.best_cost)
+            raise ExpansionError
         else:
             self.best_path.append(new_best_path)
 

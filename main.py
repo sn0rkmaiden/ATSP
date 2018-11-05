@@ -1,11 +1,11 @@
 from atsp import Atsp, Map
 from atsp.branch_and_bound import SolutionExplorer, Solution
-import cProfile
+# import cProfile
 import logging
 import time
 
 start = time.time()
-# logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO)
 city_map = Map.from_file('atsp/tests/test_data/tsp_17.txt')
 # reduction_cost = city_map._matrix.reduce()
 # point = city_map._matrix.find_division_point()
