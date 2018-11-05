@@ -1,6 +1,8 @@
 from math import inf
 from copy import deepcopy
+import logging
 
+logger = logging.getLogger(__name__)
 
 class Matrix(object):
 
@@ -31,16 +33,19 @@ class Matrix(object):
         paths = self.build_total_paths(new_chosen_edges)
         for path in paths:
             # print(path)
+            logger.warning('path {} edge {}'.format(path, point))
             if len(path) < len(self.table) + 1 and path[0] == path[-1]:
-                print('Point {} forms a cycle in path'.format(point, path))
+                logger.warning('Point {} forms a cycle in path {}'.format(point, path))
                 return True
-            else:
-                return False
+        return False
 
     def build_total_paths(self, chosen_edges):
-        return [self._build_total_path([i], list(chosen_edges)) for i in range(len(self.table))]
+        paths = [self._build_total_path([i], list(chosen_edges)) for i in range(len(self.table))]
+        logger.warning(paths)
+        return [path for path in paths if len(path) > 1]
 
     def _build_total_path(self, path, edges):
+        edges = list(edges)
         for i, edge in enumerate(edges):
             if edge[0] == path[-1]:
                 path.append(edges.pop(i)[1])
@@ -60,6 +65,7 @@ class Matrix(object):
                     possible_point = [i, j]
                     if reduction_cost > max_reduction_cost and not self.check_point_for_cycle(possible_point, chosen_edges):
                         # print(reduction_cost)
+                        logger.info('Reduction cost {} for point {}'.format(reduction_cost, point))
                         max_reduction_cost = reduction_cost
                         point = possible_point
                         # print('POINT {}'.format(point))

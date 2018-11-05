@@ -59,6 +59,7 @@ class SolutionExplorer(object):
 
     def __init__(self, city_map):
         self.map = city_map
+        logger.info('Start map:\n{}'.format(city_map))
         self.start_solution = Solution(self.map)
         self.current_solution = self.start_solution
         self.best_path = []
@@ -84,8 +85,15 @@ class SolutionExplorer(object):
             # print(self.current_solution.depth)
             # print(self.current_solution.map)
             if not self.best_cost or self.current_solution.lower_bound <= self.best_cost:
+                # try:
                 self.current_solution.expand()
-                self.current_solution = self.current_solution.left
+                # except ExpansionError:
+                #     return
+                if self.current_solution.left.lower_bound <= self.current_solution.right.lower_bound:
+
+                    self.current_solution = self.current_solution.left
+                else:
+                    self.current_solution = self.current_solution.right
                 logger.info('Expanded to {}'.format(self.current_solution))
             else:
                 return
