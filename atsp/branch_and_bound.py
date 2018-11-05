@@ -85,10 +85,10 @@ class SolutionExplorer(object):
             # print(self.current_solution.depth)
             # print(self.current_solution.map)
             if not self.best_cost or self.current_solution.lower_bound <= self.best_cost:
-                # try:
-                self.current_solution.expand()
-                # except ExpansionError:
-                #     return
+                try:
+                    self.current_solution.expand()
+                except ExpansionError:
+                    return
                 if self.current_solution.left.lower_bound <= self.current_solution.right.lower_bound:
 
                     self.current_solution = self.current_solution.left
