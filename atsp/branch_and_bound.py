@@ -65,17 +65,24 @@ class SolutionExplorer(object):
         self.best_path = []
         self.best_cost = inf
 
+    def find_all_solutions(self):
+        return self._solve(exit_on_first_solution=False)
+
     def solve(self):
+        return self._solve(exit_on_first_solution=True)
+
+    def _solve(self, exit_on_first_solution):
         self.dig_left()
         # self.find_next_possible_solution()
         while True:
+            if self.best_path and exit_on_first_solution:
+                break
             try:
                 self.find_next_possible_solution()
             except BacktrackError:
                 break
             self.dig_left()
         return self.best_path, self.best_cost
-
 
     def dig_left(self):
         # for _ in self.map.cities:
@@ -110,8 +117,6 @@ class SolutionExplorer(object):
         if not self.best_cost or self.best_cost != new_best_cost:
             self.best_path = [new_best_path]
             self.best_cost = new_best_cost
-            print(self.best_path, self.best_cost)
-            raise ExpansionError
         else:
             self.best_path.append(new_best_path)
 

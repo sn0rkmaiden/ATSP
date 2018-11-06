@@ -6,7 +6,7 @@ import time
 
 start = time.time()
 logging.basicConfig(level=logging.INFO)
-city_map = Map.from_file('atsp/tests/test_data/tsp_17.txt')
+city_map = Map.from_file('atsp/tests/test_data/tsp_12.txt')
 # reduction_cost = city_map._matrix.reduce()
 # point = city_map._matrix.find_division_point()
 # print(reduction_cost)
