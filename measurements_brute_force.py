@@ -1,12 +1,12 @@
-from atsp import Atsp, Map
-from atsp.branch_and_bound import SolutionExplorer, Solution
 import logging
 import time
 
+from atsp import Atsp, Map
+from atsp.branch_and_bound import SolutionExplorer
 
-# logging.basicConfig(level=logging.ERROR)
+logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
-logger.setLevel(level=logging.INFO)
+logger.setLevel(level=logging.DEBUG)
 
 
 def find_first_solution(city_map, timeout):
@@ -24,7 +24,7 @@ class Measurement(object):
         self.repetitions = repetitions
         self.timeout = timeout
 
-    def measure_first_solution(self):
+    def measure_brute_force(self):
         return self._measure(find_first_solution)
 
     def measure_best_solutions(self):
@@ -35,9 +35,10 @@ class Measurement(object):
         timeouts = 0
         for _ in range(self.repetitions):
             city_map = Map.from_random_matrix(size=self.size)
+            atsp = Atsp(city_map)
             start = time.time()
             try:
-                action(city_map, self.timeout)
+                atsp.brute_force()
             except TimeoutError:
                 timeouts += 1
             time_taken = time.time() - start
@@ -49,7 +50,7 @@ class Measurement(object):
 logger.info('Size,First average,First timeouts,Best average,Best timeouts')
 for i in range(5, 40, 5):
     measurement = Measurement(i)
-    first_average, first_timeouts = measurement.measure_first_solution()
-    best_average, best_timeouts = measurement.measure_best_solutions()
-    logger.info('{size},{f},{f_timeouts},{b},{b_timeouts}'.format(
-        size=i, f=first_average, f_timeouts=first_timeouts, b=best_average, b_timeouts=best_timeouts))
+    average, timeouts = measurement.measure_brute_force()
+    logger.info('{size},{average},{timeouts}'.format(
+        size=i, average=average, timeouts=timeouts)
+    )
