@@ -1,14 +1,20 @@
 from math import inf
 from copy import deepcopy
+from random import randint
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+class SplitPointNotFound(Exception):
+    pass
+
 
 class Matrix(object):
 
     def __init__(self, table):
         self.table = table
-        self.zeros_to_infinities()
+        self.prepare_diagonal()
 
     def __getitem__(self, item):
         return self.table[item]
@@ -20,60 +26,50 @@ class Matrix(object):
     def size(self):
         return len(self.table)
 
-    def zeros_to_infinities(self):
-        # for i, row in enumerate(self.table):
-        #     for j, cell in enumerate(row):
-        #         if i == j < 1:
-        #             self.table[i][j] = inf
-        for i in range(len(self.table)):
+    def prepare_diagonal(self):
+        for i in range(self.size):
             self.table[i][i] = inf
 
     def check_point_for_cycle(self, point, chosen_edges):
         new_chosen_edges = chosen_edges + [point]
         paths = self.build_total_paths(new_chosen_edges)
         for path in paths:
-            # print(path)
-            # logger.warning('path {} edge {}'.format(path, point))
             if len(path) < len(self.table) + 1 and path[0] == path[-1]:
-                # logger.warning('Point {} forms a cycle in path {}'.format(point, path))
+                logger.debug('Point {} forms a cycle in path {}'.format(point, path))
                 return True
         return False
 
     def build_total_paths(self, chosen_edges):
-        paths = [self._build_total_path([i], list(chosen_edges)) for i in range(len(self.table))]
+        paths = [self._build_total_path([i], list(chosen_edges)) for i in range(self.size)]
         return [path for path in paths if len(path) > 1]
 
     def _build_total_path(self, path, edges):
-        edges = list(edges)
         for i, edge in enumerate(edges):
             if edge[0] == path[-1]:
                 path.append(edges.pop(i)[1])
                 return self._build_total_path(path, edges)
         return path
 
-    def find_division_point(self, chosen_edges):
+    def find_split_point(self, chosen_edges):
         max_reduction_cost = -1
         point = None
         inverted = self.get_inverted()
         for i, row in enumerate(self.table):
             for j, column in enumerate(inverted):
                 if self.table[i][j] == 0:
-                    # continue
                     reduction_cost = self._reduction_cost(row, j) + self._reduction_cost(column, i)
-                    # print(reduction_cost)
                     possible_point = [i, j]
                     if reduction_cost >= max_reduction_cost and not self.check_point_for_cycle(possible_point, chosen_edges):
-                        # print(reduction_cost)
                         logger.info('Reduction cost {} for point {}'.format(reduction_cost, possible_point))
                         max_reduction_cost = reduction_cost
                         point = possible_point
-                        # print('POINT {}'.format(point))
-        return point
-        # point, value = self._find_division_point(self.table)
-        # point2, value2 = self._find_division_point(self.get_inverted())
-        # point2.reverse()
-        # return point if value > value2 else point2
-    def _reduction_cost(self, row, index):
+        if point:
+            return point
+        else:
+            raise SplitPointNotFound(self)
+
+    @staticmethod
+    def _reduction_cost(row, index):
         row = list(row)
         del row[index]
         return min(row)
@@ -139,6 +135,15 @@ class Map(object):
             ]
             return cls(Matrix(table))
 
+    @classmethod
+    def from_random_matrix(cls, size, min_value=0, max_value=100):
+        table = [
+            [
+                randint(min_value, max_value) for _ in range(size)
+            ] for _ in range(size)
+        ]
+        return cls(Matrix(table))
+
     @property
     def total_path_cost(self):
         cost = 0
@@ -166,8 +171,8 @@ class Map(object):
     def cities(self):
         return list(range(self.size))
 
-    def find_division_point(self):
-        return self._matrix.find_division_point(self.chosen_edges)
+    def find_split_point(self):
+        return self._matrix.find_split_point(self.chosen_edges)
 
     def choose_edge(self, start, destination):
         for i in range(self.size):
