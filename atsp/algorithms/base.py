@@ -13,6 +13,9 @@ class Solver(object):
         self.best_path = []
         self.best_cost = inf
 
+    def reset(self):
+        self.best_path, self.best_cost = [], inf
+
     @abstractmethod
     def solve(self, *args, **kwargs):
-        pass
+        self.reset()

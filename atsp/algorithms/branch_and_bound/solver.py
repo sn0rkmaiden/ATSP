@@ -28,9 +28,11 @@ class BranchAndBoundSolver(Solver):
         self.current_solution = self.start_solution
 
     def solve(self, timeout=30):
+        super(BranchAndBoundSolver, self).solve()
         return self._solve(exit_on_first_solution=False, timeout=timeout)
 
     def find_first_solution(self, timeout=30):
+        self.reset()
         return self._solve(exit_on_first_solution=True, timeout=timeout)
 
     def _solve(self, exit_on_first_solution, timeout):

@@ -5,6 +5,7 @@ from .utils import permutations
 class BruteForceSolver(Solver):
 
     def solve(self):
+        super(BruteForceSolver, self).solve()
         elements = list(range(1, self.map.size))
         for permutation in permutations(elements):
             path = [0] + permutation + [0]
