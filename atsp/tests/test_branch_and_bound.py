@@ -1,23 +1,6 @@
-import os
-
 import pytest
 
-from atsp import Map, SolutionExplorer
-
-
-@pytest.fixture()
-def city_map(test_set):
-    test_set_path = os.path.join(os.path.dirname(__file__), 'test_data', '{}.txt'.format(test_set))
-    return Map.from_file(test_set_path)
-
-
-@pytest.fixture()
-def solver(city_map):
-    return SolutionExplorer(city_map)
-
-
-def verify(solver, expected_path, expected_cost):
-    assert solver.find_first_solution() == (expected_path, expected_cost)
+from .fixtures import solver, city_map
 
 
 @pytest.mark.parametrize(
@@ -33,7 +16,7 @@ def verify(solver, expected_path, expected_cost):
         ('tsp_17', [0, 11, 13, 2, 9, 10, 1, 12, 15, 14, 5, 6, 3, 4, 7, 8, 16, 0], 39)
     ])
 def test_first_solution(expected_path, expected_cost, solver):
-    paths, cost = solver.find_first_solution()
+    paths, cost = solver.first_branch_and_bound_solution()
     assert cost == expected_cost
 
 
@@ -50,6 +33,6 @@ def test_first_solution(expected_path, expected_cost, solver):
         # ('tsp_17', [0, 11, 13, 2, 9, 10, 1, 12, 15, 14, 5, 6, 3, 4, 7, 8, 16, 0], 39)
     ])
 def test_all_solutions(expected_path, expected_cost, solver):
-    paths, cost = solver.find_best_solutions()
+    paths, cost = solver.branch_and_bound()
     assert cost == expected_cost
     assert expected_path in paths

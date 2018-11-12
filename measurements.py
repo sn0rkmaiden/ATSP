@@ -1,20 +1,20 @@
-from atsp import Atsp, Map
-from atsp.branch_and_bound import SolutionExplorer, Solution
+from atsp import Map
+from atsp.algorithms.branch_and_bound.solver import BranchAndBoundSolver
 import logging
 import time
 
 
-# logging.basicConfig(level=logging.ERROR)
+logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
-logger.setLevel(level=logging.INFO)
+logger.setLevel(level=logging.DEBUG)
 
 
 def find_first_solution(city_map, timeout):
-    return SolutionExplorer(city_map).find_first_solution(timeout=timeout)
+    return BranchAndBoundSolver(city_map).find_first_solution(timeout=timeout)
 
 
 def find_best_solutions(city_map, timeout):
-    return SolutionExplorer(city_map).find_best_solutions(timeout=timeout)
+    return BranchAndBoundSolver(city_map).solve(timeout=timeout)
 
 
 class Measurement(object):
@@ -38,16 +38,17 @@ class Measurement(object):
             start = time.time()
             try:
                 action(city_map, self.timeout)
+                time_taken = time.time() - start
             except TimeoutError:
+                time_taken = self.timeout
                 timeouts += 1
-            time_taken = time.time() - start
             values.append(time_taken)
-            logger.debug(time_taken)
+            # logger.debug(time_taken)
         return sum(values) / len(values), timeouts
 
 
 logger.info('Size,First average,First timeouts,Best average,Best timeouts')
-for i in range(5, 40, 5):
+for i in range(5, 12, 1):
     measurement = Measurement(i)
     first_average, first_timeouts = measurement.measure_first_solution()
     best_average, best_timeouts = measurement.measure_best_solutions()

@@ -1,7 +1,5 @@
-from math import inf
-from copy import deepcopy
-from random import randint
 import logging
+from math import inf
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +57,8 @@ class Matrix(object):
                 if self.table[i][j] == 0:
                     reduction_cost = self._reduction_cost(row, j) + self._reduction_cost(column, i)
                     possible_point = [i, j]
-                    if reduction_cost >= max_reduction_cost and not self.check_point_for_cycle(possible_point, chosen_edges):
+                    if reduction_cost >= max_reduction_cost and not self.check_point_for_cycle(possible_point,
+                                                                                               chosen_edges):
                         logger.info('Reduction cost {} for point {}'.format(reduction_cost, possible_point))
                         max_reduction_cost = reduction_cost
                         point = possible_point
@@ -112,89 +111,3 @@ class Matrix(object):
         for i, _ in enumerate(matrix[1:]):
             matrix[i + 1] = ['C{}'.format(i)] + matrix[i + 1]
         return '\n'.join([' '.join(['%-4s' % cell for cell in row]) for row in matrix])
-
-
-class Map(object):
-
-    def __init__(self, matrix):
-        self._original_matrix = deepcopy(matrix)
-        self._matrix = matrix
-        self.size = self._matrix.size
-        self.discarded_edges = []
-        self.chosen_edges = []
-        self.lower_bound = 0
-        self._update_lower_bound()
-
-    @classmethod
-    def from_file(cls, file_path):
-        with open(file_path, 'r') as input_file:
-            table = [
-                [
-                    int(cell) for cell in line.split()
-                ] for line in input_file.readlines()[1:-1]
-            ]
-            return cls(Matrix(table))
-
-    @classmethod
-    def from_random_matrix(cls, size, min_value=0, max_value=100):
-        table = [
-            [
-                randint(min_value, max_value) for _ in range(size)
-            ] for _ in range(size)
-        ]
-        return cls(Matrix(table))
-
-    @property
-    def total_path_cost(self):
-        cost = 0
-        total_path = self.build_total_path()
-        for i, city in enumerate(total_path[:-1]):
-            next_city = total_path[i+1]
-            cost += self._original_matrix[city][next_city]
-        return cost
-
-    @property
-    def total_path(self):
-        return self._build_total_path([0], self.chosen_edges)
-
-    def build_total_path(self):
-        return self._build_total_path([0], list(self.chosen_edges))
-
-    def _build_total_path(self, path, edges):
-        for i, edge in enumerate(edges):
-            if edge[0] == path[-1]:
-                path.append(edges.pop(i)[1])
-                return self._build_total_path(path, edges)
-        return path
-
-    @property
-    def cities(self):
-        return list(range(self.size))
-
-    def find_split_point(self):
-        return self._matrix.find_split_point(self.chosen_edges)
-
-    def choose_edge(self, start, destination):
-        for i in range(self.size):
-            self._matrix[start][i] = inf
-            self._matrix[i][destination] = inf
-        self._matrix[destination][start] = inf
-        self.chosen_edges.append([start, destination])
-        self._update_lower_bound()
-
-    def discard_edge(self, start, destination):
-        self._matrix[start][destination] = inf
-        self.discarded_edges += [start, destination]
-        self._update_lower_bound()
-
-    def _update_lower_bound(self):
-        self.lower_bound += self._matrix.reduce()
-
-    def get_cost(self, source, destination):
-        return self._matrix[source][destination]
-
-    def get_costs(self, source):
-        return self._matrix[source]
-
-    def __repr__(self):
-        return repr(self._matrix)

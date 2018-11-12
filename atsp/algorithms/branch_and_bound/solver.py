@@ -1,9 +1,9 @@
 import logging
 import time
-from copy import deepcopy
-from math import inf
 
-from .map import SplitPointNotFound
+from atsp.algorithms.base import Solver
+from atsp.map import SplitPointNotFound
+from .solution import Solution
 
 logger = logging.getLogger(__name__)
 
@@ -20,58 +20,14 @@ class BacktrackError(Exception):
     pass
 
 
-class Solution(object):
-
-    def __init__(self, city_map, parent=None):
-        self.map = city_map
-        self.parent = parent
-        self.left = None
-        self.right = None
-        self.completed = False
-        self.max_depth = len(self.map.cities)
-        self.depth = self.parent.depth + 1 if self.parent else 0
-
-    @property
-    def is_leaf(self):
-        r = set(tuple(set(row)) for row in self.map._matrix)
-        return r == {(inf,)}
-
-    def mark_as_completed(self):
-        self.completed = True
-
-    @property
-    def lower_bound(self):
-        return self.map.lower_bound
-
-    @property
-    def expanded(self):
-        return self.left and self.right
-
-    def expand(self):
-        point = self.map.find_split_point()
-        left_map, right_map = deepcopy(self.map), deepcopy(self.map)
-        left_map.choose_edge(*point)
-        right_map.discard_edge(*point)
-        self.left = Solution(left_map, parent=self)
-        self.right = Solution(right_map, parent=self)
-
-    def __repr__(self):
-        return 'Lower bound: {}, chosen edges {}, completed edges {}, map:\n{}'.format(
-            self.lower_bound, self.map.chosen_edges, self.map.discarded_edges, self.map
-        )
-
-
-class SolutionExplorer(object):
+class BranchAndBoundSolver(Solver):
 
     def __init__(self, city_map):
-        self.map = city_map
-        logger.info('Start map:\n{}'.format(city_map))
+        super(BranchAndBoundSolver, self).__init__(city_map)
         self.start_solution = Solution(self.map)
         self.current_solution = self.start_solution
-        self.best_path = []
-        self.best_cost = inf
 
-    def find_best_solutions(self, timeout=30):
+    def solve(self, timeout=30):
         return self._solve(exit_on_first_solution=False, timeout=timeout)
 
     def find_first_solution(self, timeout=30):
@@ -90,6 +46,7 @@ class SolutionExplorer(object):
             except BacktrackError:
                 break
             solution_found = self.check_current_solution()
+        logger.info('Found best path {} with cost {}'.format(self.best_path, self.best_cost))
         return self.best_path, self.best_cost
 
     def check_current_solution(self):
@@ -109,6 +66,7 @@ class SolutionExplorer(object):
                     self.current_solution.mark_as_completed()
                     raise ExpansionError('Split point not found')
                 left_bound, right_bound = self.current_solution.left.lower_bound, self.current_solution.right.lower_bound
+                logger.info('Left lower bound: {}. Right lower bound: {}'.format(left_bound, right_bound))
                 self.current_solution = self.current_solution.left if left_bound <= right_bound else self.current_solution.right
                 logger.info('Expanded to {}'.format(self.current_solution))
             else:
@@ -118,10 +76,11 @@ class SolutionExplorer(object):
 
     def save_current_solution(self):
         logger.info('Saving current solution')
-        new_best_path = self.current_solution.map.build_total_path()
-        new_best_cost = self.current_solution.map.total_path_cost
+        new_best_path = self.current_solution.map.path
+        new_best_cost = self.current_solution.map.cost
         if len(new_best_path) < self.map.size + 1:
-            raise IncompletePathError('Incomplete path {} for edges {}'.format(new_best_path, self.current_solution.map.chosen_edges))
+            raise IncompletePathError(
+                'Incomplete path {} for edges {}'.format(new_best_path, self.current_solution.map.chosen_edges))
         if not self.best_cost or self.best_cost != new_best_cost:
             self.best_path = [new_best_path]
             self.best_cost = new_best_cost
@@ -129,18 +88,20 @@ class SolutionExplorer(object):
             self.best_path.append(new_best_path)
 
     def find_next_solution_for_expansion(self):
-        self.backtrack()
-        self.backtrack()
-        self.backtrack()
+        self.full_backtrack()
         while self.current_solution.completed or \
                 self.best_cost < self.current_solution.right.lower_bound or \
                 self.current_solution.right.completed:
-            self.backtrack()
+            self.single_backtrack()
         self.current_solution.mark_as_completed()
         self.current_solution = self.current_solution.right
         logger.info('New expansion node {}'.format(self.current_solution))
 
-    def backtrack(self):
+    def full_backtrack(self):
+        for _ in range(3):
+            self.single_backtrack()
+
+    def single_backtrack(self):
         if self.current_solution.parent:
             self.current_solution = self.current_solution.parent
             logger.info('Backtracked to {}\n{}'.format(self.current_solution.lower_bound, self.current_solution.map))
