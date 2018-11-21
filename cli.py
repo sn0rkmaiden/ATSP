@@ -12,7 +12,7 @@ class MainMenu(AbstractMenu):
 
     def initialise(self):
         self.add_menu_item(MenuItem(100, "Exit menu").set_as_exit_option())
-        self.add_menu_item(MenuItem(101, "Display map", lambda: print(self.map)))
+        self.add_menu_item(MenuItem(101, "Display map", lambda: print(self.map.original_matrix)))
         self.add_menu_item(MenuItem(102, "Solve using B&B", self.create_handler(self.atsp.branch_and_bound)))
         self.add_menu_item(MenuItem(103, "Find first solution using B&B",
                                     self.create_handler(self.atsp.first_branch_and_bound_solution)))

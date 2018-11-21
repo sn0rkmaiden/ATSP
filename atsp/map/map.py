@@ -12,7 +12,7 @@ class Map(object):
 
     def __init__(self, matrix):
         logger.info('Created map from matrix:\n{}'.format(matrix))
-        self._original_matrix = deepcopy(matrix)
+        self.original_matrix = deepcopy(matrix)
         self._matrix = matrix
         self.size = self._matrix.size
         self.discarded_edges = []
@@ -47,7 +47,7 @@ class Map(object):
         cost = 0
         for i, city in enumerate(path[:-1]):
             next_city = path[i + 1]
-            cost += self._original_matrix[city][next_city]
+            cost += self.original_matrix[city][next_city]
         return cost
 
     @property
