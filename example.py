@@ -2,9 +2,10 @@ import logging
 
 from atsp import Map, Atsp
 
-# logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO)
 
-city_map = Map.from_file('atsp/tests/test_data/tsp_17_2.txt')
+city_map = Map.from_atsp('atsp/tests/test_data/rbg403.atsp')
+# print(city_map.original_matrix)
 # path, cost = Atsp(city_map).simulated_annealing()
 print(Atsp(city_map).simulated_annealing())
-print(Atsp(city_map).first_branch_and_bound_solution())
+# print(Atsp(city_map).first_branch_and_bound_solution())

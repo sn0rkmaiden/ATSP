@@ -31,6 +31,28 @@ class Map(object):
             return cls(Matrix(table))
 
     @classmethod
+    def from_atsp(cls, file_path):
+        with open(file_path, 'r') as input_file:
+            dimension = None
+            while not dimension:
+                line = input_file.readline()
+                if line.startswith('DIMENSION'):
+                    dimension = int(line.split(' ')[1])
+            while not input_file.readline().startswith('EDGE_WEIGHT_SECTION'):
+                pass
+            table = []
+            current_row = []
+            current_line = input_file.readline()
+            while not current_line.startswith('EOF'):
+                current_row += [int(cell) for cell in current_line.split()]
+                current_line = input_file.readline()
+                if len(current_row) >= dimension:
+                    row = current_row[:dimension]
+                    current_row = current_row[dimension:]
+                    table.append(row)
+            return cls(Matrix(table))
+
+    @classmethod
     def from_random_matrix(cls, size, min_value=0, max_value=100):
         table = [
             [

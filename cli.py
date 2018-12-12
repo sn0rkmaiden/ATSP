@@ -17,6 +17,15 @@ class MainMenu(AbstractMenu):
         self.add_menu_item(MenuItem(103, "Find first solution using B&B",
                                     self.create_handler(self.atsp.first_branch_and_bound_solution)))
         self.add_menu_item(MenuItem(104, "Solve using brute force", self.create_handler(self.atsp.brute_force)))
+        self.add_menu_item(MenuItem(105, "Solve using simulated annealing", self.sa_menu))
+
+    def sa_menu(self):
+        start = input('Enter start temperature (default 9000): ') or 9000
+        end = input('Enter end temperature (default 0.1): ') or 0.1
+        cooling_factor = input('Enter cooling factor (default 0.999): ') or 0.999
+        timeout = input('Enter timeout (default 30 seconds): ') or 0.999
+        result = self.atsp.simulated_annealing(float(start), float(end), float(cooling_factor), timeout=float(timeout))
+        print('Found path {} with cost {}'.format(*result))
 
     @staticmethod
     def create_handler(solve):
@@ -24,7 +33,7 @@ class MainMenu(AbstractMenu):
 
 
 def load(file_path):
-    city_map = Map.from_file(file_path)
+    city_map = Map.from_file(file_path) if file_path.endswith('txt') else Map.from_atsp(file_path)
     menu = MainMenu(city_map)
     menu.display()
 
