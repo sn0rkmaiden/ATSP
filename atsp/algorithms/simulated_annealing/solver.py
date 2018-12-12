@@ -14,6 +14,8 @@ class SimulatedAnnealing(Solver):
         self.start_temperature = start_temperature * self.map.size
         self.end_temperature = end_temperature
         self.cooling_factor = cooling_factor
+        self.best_solution_timestamp = None
+        self.end_timestamp = None
 
     def solve(self, timeout=60):
         start = time.time()
@@ -26,7 +28,7 @@ class SimulatedAnnealing(Solver):
         best_cost = current_cost
         print_timeout = 1
         last_print = start
-        while temperature > self.end_temperature:# and time.time() - start < timeout:
+        while temperature > self.end_temperature and time.time() - start < timeout:
             if time.time() - last_print > print_timeout:
                 logger.info('Temperature: {}'.format(temperature))
                 last_print = time.time()
@@ -36,6 +38,7 @@ class SimulatedAnnealing(Solver):
                 if new_cost < best_cost:
                     best_path = new_path
                     best_cost = new_cost
+                    self.best_solution_timestamp = time.time() - start
                 current_path = new_path
                 current_cost = new_cost
             else:
@@ -44,6 +47,7 @@ class SimulatedAnnealing(Solver):
                     current_path = new_path
                     current_cost = new_cost
             temperature *= self.cooling_factor
+        self.end_timestamp = time.time() - start
         return best_path, best_cost
 
     @staticmethod
