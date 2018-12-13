@@ -11,8 +11,8 @@ class Atsp(object):
     def brute_force(self):
         return BruteForceSolver(self.city_map).solve()
 
-    def simulated_annealing(self, start_temperature=9000, end_temperature=0.1, cooling_factor=0.999, timeout=30):
-        return SimulatedAnnealing(self.city_map, start_temperature, end_temperature, cooling_factor)\
+    def simulated_annealing(self, end_temperature=0, cooling_factor=0.999, timeout=30):
+        return SimulatedAnnealing(self.city_map, cooling_factor, end_temperature)\
             .solve(timeout=timeout)
 
     def branch_and_bound(self, timeout=30):

@@ -13,6 +13,7 @@ class Map(object):
     def __init__(self, matrix):
         logger.info('Created map from matrix:\n{}'.format(matrix))
         self.original_matrix = deepcopy(matrix)
+        self.max_distance = max([max([cell for cell in row if cell != inf]) for row in self.original_matrix])
         self._matrix = matrix
         self.size = self._matrix.size
         self.discarded_edges = []

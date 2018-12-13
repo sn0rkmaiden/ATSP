@@ -14,7 +14,7 @@ class Measurement(object):
     def __init__(self, file_path, known_best_value, cooling_factor, repetitions=10, timeout=30):
         city_map = Map.from_atsp(file_path)
         self.known_best_value = known_best_value
-        self.solver = SimulatedAnnealing(city_map, 9000, 0.1, cooling_factor=cooling_factor)
+        self.solver = SimulatedAnnealing(city_map, cooling_factor=cooling_factor)
         self.repetitions = repetitions
         self.timeout = timeout
 
