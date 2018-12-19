@@ -40,18 +40,18 @@ class MeasurementLog:
         return report
 
     def time_summary(self):
-        header = 'Timestamp,Cost,Temperature'
+        header = 'Timestamp;Cost;Temperature'
         rows = [header]
         report = self.generate_report()
         for timestamp, stat in report.items():
-            rows.append('{},{},{}'.format(round(timestamp), stat['costs'], stat['temperatures']))
+            rows.append('{};{};{}'.format(round(timestamp), stat['costs'], stat['temperatures']))
         return '\n'.join(rows)
 
     def best_summary(self):
-        header = 'Timestamp,Cost,Path'
+        header = 'Timestamp;Cost;Path'
         rows = [header]
         for i, _ in enumerate(self.best['cost']):
-            rows.append('{},{},{}'.format(round(self.best['timestamp'][i]),
+            rows.append('{};{};{}'.format(round(self.best['timestamp'][i]),
                                           self.best['cost'][i],
                                           self.best['path'][i]))
         return '\n'.join(rows)
@@ -83,7 +83,7 @@ class SimulatedAnnealing(Solver):
             if time.time() - last_print > print_timeout:
                 last_print = time.time()
                 self.log.add(round(last_print - start), temperature, best_cost)
-                logger.info('{},{},{}'.format(round(last_print - start), best_cost, round(temperature, 10)))
+                logger.info('{},{},{}'.format(round(last_print - start), best_cost, temperature))
             new_path = self.swap_random_elements(list(current_path))
             new_cost = self.map.calculate_cost(new_path)
             if new_cost < current_cost:
@@ -100,7 +100,7 @@ class SimulatedAnnealing(Solver):
                     current_cost = new_cost
             temperature *= self.cooling_factor
         self.end_timestamp = time.time() - start
-        self.log.add_best(timestamp=self.end_timestamp, cost=best_cost, path=best_path)
+        self.log.add_best(timestamp=self.best_solution_timestamp, cost=best_cost, path=best_path)
         return best_path, best_cost
 
     @staticmethod
