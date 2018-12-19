@@ -20,11 +20,10 @@ class MainMenu(AbstractMenu):
         self.add_menu_item(MenuItem(105, "Solve using simulated annealing", self.sa_menu))
 
     def sa_menu(self):
-        start = input('Enter start temperature (default 9000): ') or 9000
-        end = input('Enter end temperature (default 0.1): ') or 0.1
+        end = input('Enter end temperature (default 0): ') or 0
         cooling_factor = input('Enter cooling factor (default 0.999): ') or 0.999
-        timeout = input('Enter timeout (default 30 seconds): ') or 0.999
-        result = self.atsp.simulated_annealing(float(start), float(end), float(cooling_factor), timeout=float(timeout))
+        timeout = input('Enter timeout (default 30 seconds): ') or 30
+        result = self.atsp.simulated_annealing(float(end), float(cooling_factor), timeout=float(timeout))
         print('Found path {} with cost {}'.format(*result))
 
     @staticmethod
