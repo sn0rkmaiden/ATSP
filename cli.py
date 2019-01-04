@@ -18,12 +18,22 @@ class MainMenu(AbstractMenu):
                                     self.create_handler(self.atsp.first_branch_and_bound_solution)))
         self.add_menu_item(MenuItem(104, "Solve using brute force", self.create_handler(self.atsp.brute_force)))
         self.add_menu_item(MenuItem(105, "Solve using simulated annealing", self.sa_menu))
+        self.add_menu_item(MenuItem(106, "Solve using genetic algorithm", self.ga_menu))
 
     def sa_menu(self):
         end = input('Enter end temperature (default 0): ') or 0
         cooling_factor = input('Enter cooling factor (default 0.999): ') or 0.999
         timeout = input('Enter timeout (default 30 seconds): ') or 30
         result = self.atsp.simulated_annealing(float(end), float(cooling_factor), timeout=float(timeout))
+        print('Found path {} with cost {}'.format(*result))
+
+    def ga_menu(self):
+        population = input('Enter population size: ')
+        crossover = input('Enter crossover coefficient (default 0.8): ') or 0.9
+        mutation = input('Enter mutation coefficient (default 0.1): ') or 0.1
+        timeout = input('Enter timeout (default 30 seconds): ') or 30
+        result = self.atsp.genetic_algorithm(int(population), float(crossover), float(mutation),
+                                             timeout=int(timeout))
         print('Found path {} with cost {}'.format(*result))
 
     @staticmethod

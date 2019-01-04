@@ -48,10 +48,6 @@ class Chromosome(object):
         self.path = swap_random_elements(self.path)
         self.cost = self.map.calculate_cost(self.path)
 
-    @staticmethod
-    def random_path_index(path):
-        return random.randint(1, len(path) - 2)
-
     def __lt__(self, other):
         return self.cost < other.cost
 
@@ -112,10 +108,7 @@ class GeneticSolver(Solver):
                     break
                 if chromosome not in mate.crossed_with and len(mate.crossed_with) < mates_per_chromosome:
                     offsprings += list(chromosome.mutual_crossover(mate))
-        # offsprings = list(set(offsprings))
-        # offsprings.sort()
         logger.debug(f'Generated offsprings:\n{pformat(offsprings)}')
-        # self.population = offsprings[:self.population_size]
         return offsprings
 
     def random_path(self):
