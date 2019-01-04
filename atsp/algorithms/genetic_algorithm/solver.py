@@ -4,6 +4,7 @@ from pprint import pformat
 import random
 import time
 import logging
+import math
 
 
 logger = logging.getLogger(__name__)
@@ -80,16 +81,29 @@ class GeneticSolver(Solver):
         return population
 
     def breed(self):
-            # logger.info(f'{len(offsprings)} offsprings, generating...')
+        # logger.info(f'{len(offsprings)} offsprings, generating...')
         offsprings = self.generate_offsprings()
         self.add_mutations(offsprings)
         offsprings = list(set(offsprings))
-        offsprings.sort()
-        self.population = offsprings[:min(len(offsprings), self.population_size)]
+        self.population = self.selection(offsprings) if offsprings else offsprings
         self.population_index += 1
         logger.debug(f'New population:\n{pformat(self.population)}')
         if self.population:
             logger.debug(f'New population max: {self.population[0]}')
+
+    def selection(self, offsprings):
+        offsprings.sort()
+        elitist = offsprings.pop(0)
+        new_population = [elitist]
+        while offsprings and len(new_population) != self.population_size:
+            number_of_participants = len(offsprings)
+            indexes = list(range(number_of_participants))
+            tournament = list(zip(indexes, offsprings))
+            selected = random.sample(tournament, math.ceil(number_of_participants / 2))
+            winner = min(selected, key=lambda participant: participant[1])
+            new_population.append(winner[1])
+            del offsprings[winner[0]]
+        return new_population
 
     def add_mutations(self, offsprings):
         for offspring in offsprings:
