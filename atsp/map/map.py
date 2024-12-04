@@ -37,9 +37,9 @@ class Map(object):
             dimension = None
             while not dimension:
                 line = input_file.readline()
-                if line.startswith('DIMENSION'):
+                if line.startswith('dimension'):
                     dimension = int(line.split(' ')[1])
-            while not input_file.readline().startswith('EDGE_WEIGHT_SECTION'):
+            while not input_file.readline().startswith('edge_weights'):
                 pass
             table = []
             current_row = []
